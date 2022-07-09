@@ -3,11 +3,11 @@ package model;
 /**
  * Represents dot and dash counts of a word
  */
-public class MorseCodeCount {
+public class MorseCode {
 	private final int dotCount;
 	private final int dashCount;
 
-	public MorseCodeCount(int dotCount, int dashCount) {
+	public MorseCode(int dotCount, int dashCount) {
 		this.dotCount = dotCount;
 		this.dashCount = dashCount;
 	}

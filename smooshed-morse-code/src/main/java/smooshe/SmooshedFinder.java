@@ -5,74 +5,68 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import model.MorseCodeCount;
+import org.apache.commons.lang3.StringUtils;
+
+import model.MorseCode;
 
 /**
  * Calculates and serves five use cases
  */
 public class SmooshedFinder {
-	private static final String EMPTY_STRING = "";
-
 	private final Smooshed smooshed;
 
-	public SmooshedFinder(Smooshed smooshed){
+	public SmooshedFinder(Smooshed smooshed) {
 		this.smooshed = smooshed;
 	}
 
 	/**
-	 * Find the only sequence that's the code for 13 different words.
-	 * @return - the word which its morse code is same for 13 different word, empty string if the word is not found
+	 * Finds different words which their smooshed morse is the same.
+	 *
+	 * @param count - count of words
+	 * @return - words which its morse code is same for {@param count} different words , empty string if the word is not found
 	 */
-	public String codeThatIsSameFor13DifferentWords(){
-		Map<String, String> wordMap = smooshed.getWordMorseCodeMap();
-		Map<String, List<String>> resultMap = new HashMap<>();
-		for (Map.Entry<String, String> entry : wordMap.entrySet()) {
-			if(resultMap.containsKey(entry.getValue())){
-				resultMap.get(entry.getValue()).add(entry.getKey());
-			}else{
-				List<String> list = new ArrayList<>();
-				list.add(entry.getKey());
-				resultMap.put(entry.getValue(), list);
-			}
-		}
-
+	public List<String> getWordsHavingSameSmooshedMorseCode(int count) {
+		List<String> wordList = new ArrayList<>();
+		Map<String, List<String>> resultMap = groupMorseCodeMap(smooshed.getWordMorseCodeMap());
 		for (Map.Entry<String, List<String>> entry : resultMap.entrySet()) {
-			if(entry.getValue().size() == 13){
-				return entry.getKey();
+			if (entry.getValue().size() == count) {
+				wordList.add(entry.getKey());
 			}
 		}
-		return EMPTY_STRING;
+		return wordList;
 	}
 
 	/**
-	 * Find the only word that has 15 dashes in a row.
-	 * @return - the first word which has 15 dashes in the list, empty string if the word is not found
+	 * Finds words with a given dash count.
+	 *
+	 * @param dashCount - count of dash in a word
+	 * @return - words which has {@param dashCount} dashes, empty list if words is not found
 	 */
-	public String wordHas15Dashes(){
-		Map<String, String> wordMap = smooshed.getWordMorseCodeMap();
-		for (Map.Entry<String, String> entry : wordMap.entrySet()) {
+	public List<String> getWords(int dashCount) {
+		List<String> wordList = new ArrayList<>();
+		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
 			int dashNumber = smooshed.countDashes(entry.getValue());
-			if(dashNumber == 15){
-				return entry.getKey();
+			if (dashNumber == dashCount) {
+				wordList.add(entry.getKey());
 			}
 		}
-		return EMPTY_STRING;
+		return wordList;
 	}
 
-
 	/**
-	* Call a word perfectly balanced if its code has the same number of dots as dashes.
-	* counterdemonstrations is one of two 21-letter words that's perfectly balanced.
-	 * Find the other one.
+	 * Finds perfectly balanced words based on letter count.
+	 * Call a word perfectly balanced if its code has the same number of dots as dashes.
+	 * counterdemonstrations is one of two 21-letter words that's perfectly balanced.
+	 *
+	 * @param letterCount - count of letter in a word
 	 * @return - perfectly balanced words, empty list if there is no balanced word
 	 */
-	public List<String> getPerfectlyBalancedWords(){
-		Map<String, String> wordMap = smooshed.getWordMorseCodeMap();
+	public List<String> getPerfectlyBalancedWords(int letterCount) {
 		List<String> perfectlyBalancedWord = new ArrayList<>();
-		for (Map.Entry<String, String> entry : wordMap.entrySet()){
-			if(entry.getKey().length() == 21){
-				MorseCodeCount morseCodeCount = smooshed.countDashesAndDots(entry.getValue());
-				if(morseCodeCount.getDotCount() == morseCodeCount.getDashCount()){
+		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
+			if (entry.getKey().length() == letterCount) {
+				MorseCode morseCode = smooshed.countDashesAndDots(entry.getValue());
+				if (morseCode.getDotCount() == morseCode.getDashCount()) {
 					perfectlyBalancedWord.add(entry.getKey());
 				}
 			}
@@ -80,12 +74,44 @@ public class SmooshedFinder {
 		return perfectlyBalancedWord;
 	}
 
-	/*
-	protectorate is 12 letters long and encodes to .--..-.----.-.-.----.-..--.,
-	which is a palindrome (i.e. the string is the same when reversed). Find the only 13-letter word that encodes to a palindrome.
+	/**
+	 * Protectorate is 12 letters long and encodes to .--..-.----.-.-.----.-..--.,which is a palindrome (i.e. the string is the same when reversed).
+	 * Find the only 13-letter word that encodes to a palindrome.
+	 *
+	 * @param letterCount - count of letter in a word
+	 * @return a palindrome word in a given letter count. If there is no word is find, returns empty string
 	 */
+	public String getPalindromeWord(int letterCount) {
+		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
+			if (entry.getValue().length() == letterCount) {
+				String reverse = new StringBuilder(entry.getValue()).reverse().toString();
+				if (entry.getValue().equals(reverse)) {
+					return entry.getValue();
+				}
+			}
+		}
+		return StringUtils.EMPTY;
+	}
 
 	/*
-	--.---.---.-- is one of five 13-character sequences that does not appear in the encoding of any word. Find the other four.
+	--.---.---.-- is one of five 13-character sequences that does not appear in the encoding of any word.
+	 Find the other four.
 	 */
+	public List<String> getSequencesNotAppear(int characterCount) {
+		return List.of();
+	}
+
+	private Map<String, List<String>> groupMorseCodeMap(Map<String, String> wordMap) {
+		Map<String, List<String>> resultMap = new HashMap<>();
+		for (Map.Entry<String, String> entry : wordMap.entrySet()) {
+			if (resultMap.containsKey(entry.getValue())) {
+				resultMap.get(entry.getValue()).add(entry.getKey());
+			} else {
+				List<String> list = new ArrayList<>();
+				list.add(entry.getKey());
+				resultMap.put(entry.getValue(), list);
+			}
+		}
+		return resultMap;
+	}
 }
