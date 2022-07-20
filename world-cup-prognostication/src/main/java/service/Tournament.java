@@ -29,7 +29,6 @@ public class Tournament {
 	}
 
 	private Team play(Team firstTeam, Team secondTeam) {
-		// Toss a coin, who wins. 1: firstTeam wins, 0: secondTeam wins
 		double winExpectationOfFirstTeam = probability.calculateWinExpectation(firstTeam, secondTeam);
 		boolean firstTeamWins = random.nextDouble() < winExpectationOfFirstTeam;
 		firstTeam.setRating((int) (firstTeam.getRating() + probability.calculateEloRating(firstTeam, secondTeam, firstTeamWins)));
