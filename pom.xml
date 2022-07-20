@@ -12,6 +12,7 @@
         <module>cryptanalysis</module>
         <module>smooshed-morse-code</module>
         <module>texas-hold-em</module>
+        <module>world-cup-prognostication</module>
     </modules>
 
     <properties>
