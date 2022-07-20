@@ -13,22 +13,41 @@ import service.Probability;
 import service.Tournament;
 
 public final class WordCupPrognostication {
-	private static final Team ENGLAND          = new Team(Country.ENGLAND, 1692);
-	private static final Team GERMANY          = new Team(Country.GERMANY, 1775);
-	private static final Team NETHERLANDS      = new Team(Country.NETHERLANDS, 1726);
-	private static final Team DENMARK          = new Team(Country.DENMARK, 1503);
-	private static final Team NORWAY           = new Team(Country.NORWAY, 1537);
-	private static final Team SWEDEN           = new Team(Country.SWEDEN, 1801);
-	private static final Team FRANCE           = new Team(Country.FRANCE, 1832);
-	private static final Team BELGIUM          = new Team(Country.BELGIUM, 1374);
-	private static final Team ICELAND          = new Team(Country.ICELAND, 1476);
-	private static final Team SPAIN            = new Team(Country.SPAIN, 1668);
-	private static final Team FINLAND          = new Team(Country.FINLAND, 1210);
-	private static final Team AUSTRIA          = new Team(Country.AUSTRIA, 1380);
-	private static final Team ITALY            = new Team(Country.ITALY, 1582);
-	private static final Team SWITZERLAND      = new Team(Country.SWITZERLAND, 1327);
-	private static final Team NORTHERN_IRELAND = new Team(Country.NORTHERN_IRELAND, 980);
-	private static final Team PORTUGAL         = new Team(Country.PORTUGAL, 1248);
+	private static final Map<Country, Integer> scoreMap = Map.ofEntries(
+			Map.entry(Country.ENGLAND, 1692),
+			Map.entry(Country.GERMANY, 1775),
+			Map.entry(Country.NETHERLANDS, 1726),
+			Map.entry(Country.DENMARK, 1503),
+			Map.entry(Country.NORWAY, 1537),
+			Map.entry(Country.SWEDEN, 1801),
+			Map.entry(Country.FRANCE, 1832),
+			Map.entry(Country.BELGIUM, 1374),
+			Map.entry(Country.ICELAND, 1476),
+			Map.entry(Country.SPAIN, 1668),
+			Map.entry(Country.FINLAND, 1210),
+			Map.entry(Country.AUSTRIA, 1380),
+			Map.entry(Country.ITALY, 1582),
+			Map.entry(Country.SWITZERLAND, 1327),
+			Map.entry(Country.NORTHERN_IRELAND, 980),
+			Map.entry(Country.PORTUGAL, 1248)
+	);
+
+	private static final Team ENGLAND          = new Team(Country.ENGLAND, scoreMap.get(Country.ENGLAND));
+	private static final Team GERMANY          = new Team(Country.GERMANY, scoreMap.get(Country.GERMANY));
+	private static final Team NETHERLANDS      = new Team(Country.NETHERLANDS, scoreMap.get(Country.NETHERLANDS));
+	private static final Team DENMARK          = new Team(Country.DENMARK, scoreMap.get(Country.DENMARK));
+	private static final Team NORWAY           = new Team(Country.NORWAY, scoreMap.get(Country.NORWAY));
+	private static final Team SWEDEN           = new Team(Country.SWEDEN, scoreMap.get(Country.SWEDEN));
+	private static final Team FRANCE           = new Team(Country.FRANCE, scoreMap.get(Country.FRANCE));
+	private static final Team BELGIUM          = new Team(Country.BELGIUM, scoreMap.get(Country.BELGIUM));
+	private static final Team ICELAND          = new Team(Country.ICELAND, scoreMap.get(Country.ICELAND));
+	private static final Team SPAIN            = new Team(Country.SPAIN, scoreMap.get(Country.SPAIN));
+	private static final Team FINLAND          = new Team(Country.FINLAND, scoreMap.get(Country.FINLAND));
+	private static final Team AUSTRIA          = new Team(Country.AUSTRIA, scoreMap.get(Country.AUSTRIA));
+	private static final Team ITALY            = new Team(Country.ITALY, scoreMap.get(Country.ITALY));
+	private static final Team SWITZERLAND      = new Team(Country.SWITZERLAND, scoreMap.get(Country.SWITZERLAND));
+	private static final Team NORTHERN_IRELAND = new Team(Country.NORTHERN_IRELAND, scoreMap.get(Country.NORTHERN_IRELAND));
+	private static final Team PORTUGAL         = new Team(Country.PORTUGAL, scoreMap.get(Country.PORTUGAL));
 
 	private static final List<Team> FIRST_POT  = Arrays.asList(ENGLAND, AUSTRIA, NORWAY, NORTHERN_IRELAND);
 	private static final List<Team> SECOND_POT = Arrays.asList(GERMANY, DENMARK, SPAIN, FINLAND);
@@ -62,6 +81,7 @@ public final class WordCupPrognostication {
 		for (int i = 0; i < SIMULATION_RUN; i++) {
 			Team winner = playTournament(false);
 			simulationWinners.put(winner.getName(), simulationWinners.getOrDefault(winner.getName(), 0) + 1);
+			resetScores();
 		}
 		simulationWinners.entrySet().stream().sorted(Map.Entry.comparingByValue())
 				.forEach(countryIntegerEntry -> printToConsole(true, "%s - %s%n", countryIntegerEntry.getKey(), countryIntegerEntry.getValue()));
@@ -101,6 +121,10 @@ public final class WordCupPrognostication {
 			return winner.get(0);
 		}
 		throw new IllegalStateException("Could not find winner");
+	}
+
+	private static void resetScores() {
+		Arrays.asList(FIRST_POT, SECOND_POT, THIRD_POT, FOURTH_POT).forEach(pot -> pot.forEach(team -> team.setRating(scoreMap.get(team.getName()))));
 	}
 
 	private static void printToConsole(boolean print, String text, Object... args) {
