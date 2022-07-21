@@ -29,7 +29,7 @@ class SmooshedTest {
 
 	@Test
 	void smooshed_validateConstructor() {
-		Map<Character, String> morseCodeMap = smooshed.getMorseCodeMap();
+		Map<Character, String> morseCodeMap = smooshed.getMorseCodeAlphabet();
 		assertNotNull(morseCodeMap);
 		assertEquals(26, morseCodeMap.size());
 	}
