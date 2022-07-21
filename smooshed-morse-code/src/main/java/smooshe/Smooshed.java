@@ -17,17 +17,19 @@ import util.FileReader;
 public class Smooshed {
 	private static final String MORSE_CODE    = ".- -... -.-. -.. . ..-. --. .... .. .--- -.- .-.. -- -. --- .--. --.- .-. ... - ..- ...- .-- -..- -.-- --..";
 	private static final String WORD_LIST_TXT = "wordList.txt";
+	private static final char   CHAR_DASH     = '-';
+	private static final char   CHAR_DOT      = '.';
+	private static final char   CHAR_LETTER_A = 'a';
 
-	private final FileReader fileReader;
-
-	private final Map<Character, String> morseCodeMap;
-	private final Map<String, String>    wordMorseCodeMap;
+	private final FileReader             fileReader;
+	private final Map<String, String>    morseCodeWords;
+	private final Map<Character, String> morseCodeAlphabet;
 
 	public Smooshed(FileReader fileReader) {
 		this.fileReader = fileReader;
-		morseCodeMap = new HashMap<>();
-		wordMorseCodeMap = new HashMap<>();
-		createMorseCodeMap();
+		morseCodeWords = new HashMap<>();
+		morseCodeAlphabet = new HashMap<>();
+		createMorseCodeAlphabet();
 		createMorseCodeWords();
 	}
 
@@ -44,7 +46,7 @@ public class Smooshed {
 
 		StringBuilder stringBuilder = new StringBuilder();
 		for (char letter : wordTobeConverted.toCharArray()) {
-			stringBuilder.append(morseCodeMap.getOrDefault(letter, StringUtils.EMPTY));
+			stringBuilder.append(morseCodeAlphabet.getOrDefault(letter, StringUtils.EMPTY));
 		}
 		return stringBuilder.toString();
 	}
@@ -56,13 +58,7 @@ public class Smooshed {
 	 * @return - dash count
 	 */
 	public int countDashes(String word) {
-		int count = 0;
-		for (char letter : word.toCharArray()) {
-			if (letter == '-') {
-				count++;
-			}
-		}
-		return count;
+		return (int) word.chars().filter(c -> c == CHAR_DASH).count();
 	}
 
 	/**
@@ -72,39 +68,32 @@ public class Smooshed {
 	 * @return - MorseCode object which holds dash and dot counts
 	 */
 	public MorseCode countDashesAndDots(String word) {
-		int dashCount = 0;
-		int dotCount = 0;
-		for (char letter : word.toCharArray()) {
-			if (letter == '-') {
-				dashCount++;
-			} else if (letter == '.') {
-				dotCount++;
-			}
-		}
+		int dashCount = (int) word.chars().filter(c -> c == CHAR_DASH).count();
+		int dotCount = (int) word.chars().filter(c -> c == CHAR_DOT).count();
 		return new MorseCode(dotCount, dashCount);
 	}
 
-	private void createMorseCodeMap() {
+	public Map<Character, String> getMorseCodeAlphabet() {
+		return morseCodeAlphabet;
+	}
+
+	public Map<String, String> getMorseCodeWords() {
+		return morseCodeWords;
+	}
+
+	private void createMorseCodeAlphabet() {
 		String[] splitMorseCode = MORSE_CODE.split(StringUtils.SPACE);
-		char charLetter = 'a';
+		char charLetter = CHAR_LETTER_A;
 		for (String code : splitMorseCode) {
-			morseCodeMap.put(charLetter++, code);
+			morseCodeAlphabet.put(charLetter++, code);
 		}
 	}
 
 	private void createMorseCodeWords() {
 		try {
-			fileReader.readFile(WORD_LIST_TXT).forEach(word -> wordMorseCodeMap.put(word, smooshe(word)));
+			fileReader.readFile(WORD_LIST_TXT).forEach(word -> morseCodeWords.put(word, smooshe(word)));
 		} catch (URISyntaxException | IOException e) {
 			throw new IllegalStateException("Could not found word list file to read", e);
 		}
-	}
-
-	public Map<Character, String> getMorseCodeMap() {
-		return morseCodeMap;
-	}
-
-	public Map<String, String> getWordMorseCodeMap() {
-		return wordMorseCodeMap;
 	}
 }

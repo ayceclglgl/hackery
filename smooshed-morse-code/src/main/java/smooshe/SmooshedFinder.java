@@ -13,7 +13,9 @@ import model.MorseCode;
  * Calculates and serves five use cases
  */
 public class SmooshedFinder {
-	private final Smooshed smooshed;
+	private static final List<Character> CHARACTER_LIST = List.of('.', '-');
+	private static final String          DASH           = "-";
+	private final        Smooshed        smooshed;
 
 	public SmooshedFinder(Smooshed smooshed) {
 		this.smooshed = smooshed;
@@ -27,7 +29,7 @@ public class SmooshedFinder {
 	 */
 	public List<String> getWordsHavingSameSmooshedMorseCode(int count) {
 		List<String> wordList = new ArrayList<>();
-		Map<String, List<String>> resultMap = groupMorseCodeMap(smooshed.getWordMorseCodeMap());
+		Map<String, List<String>> resultMap = groupMorseCodeWords(smooshed.getMorseCodeWords());
 		for (Map.Entry<String, List<String>> entry : resultMap.entrySet()) {
 			if (entry.getValue().size() == count) {
 				wordList.add(entry.getKey());
@@ -37,16 +39,16 @@ public class SmooshedFinder {
 	}
 
 	/**
-	 * Finds words with a given dash count.
+	 * Finds words with a given dash count in a row.
 	 *
 	 * @param dashCount - count of dash in a word
 	 * @return - words which has {@param dashCount} dashes, empty list if words is not found
 	 */
-	public List<String> getWords(int dashCount) {
+	public List<String> getMorseCodeWords(int dashCount) {
 		List<String> wordList = new ArrayList<>();
-		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
-			int dashNumber = smooshed.countDashes(entry.getValue());
-			if (dashNumber == dashCount) {
+		String dashes = DASH.repeat(Math.max(0, dashCount));
+		for (Map.Entry<String, String> entry : smooshed.getMorseCodeWords().entrySet()) {
+			if (entry.getValue().contains(dashes)) {
 				wordList.add(entry.getKey());
 			}
 		}
@@ -63,7 +65,7 @@ public class SmooshedFinder {
 	 */
 	public List<String> getPerfectlyBalancedWords(int letterCount) {
 		List<String> perfectlyBalancedWord = new ArrayList<>();
-		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
+		for (Map.Entry<String, String> entry : smooshed.getMorseCodeWords().entrySet()) {
 			if (entry.getKey().length() == letterCount) {
 				MorseCode morseCode = smooshed.countDashesAndDots(entry.getValue());
 				if (morseCode.getDotCount() == morseCode.getDashCount()) {
@@ -82,26 +84,61 @@ public class SmooshedFinder {
 	 * @return a palindrome word in a given letter count. If there is no word is find, returns empty string
 	 */
 	public String getPalindromeWord(int letterCount) {
-		for (Map.Entry<String, String> entry : smooshed.getWordMorseCodeMap().entrySet()) {
-			if (entry.getValue().length() == letterCount) {
+		for (Map.Entry<String, String> entry : smooshed.getMorseCodeWords().entrySet()) {
+			if (entry.getKey().length() == letterCount) {
 				String reverse = new StringBuilder(entry.getValue()).reverse().toString();
 				if (entry.getValue().equals(reverse)) {
-					return entry.getValue();
+					return entry.getKey();
 				}
 			}
 		}
 		return StringUtils.EMPTY;
 	}
 
-	/*
-	--.---.---.-- is one of five 13-character sequences that does not appear in the encoding of any word.
-	 Find the other four.
+	/**
+	 * Finds {@param characterCount}-letter words and subtracts words given in the list.
+	 *
+	 * @param characterCount - letter count
+	 * @return - a list of difference
 	 */
 	public List<String> getSequencesNotAppear(int characterCount) {
-		return List.of();
+		List<String> morseCodeCombinations = getAllMorseCodeCombination(characterCount);
+		List<String> morseCodeWords = new ArrayList<>();
+		smooshed.getMorseCodeWords().forEach((k, v) -> morseCodeWords.add(v));
+
+		List<String> result = new ArrayList<>();
+		for (String combination : morseCodeCombinations) {
+			boolean isInTheList = false;
+			for (String word : morseCodeWords) {
+				if (word.contains(combination)) {
+					isInTheList = true;
+					break;
+				}
+			}
+			if (!isInTheList) {
+				result.add(combination);
+			}
+		}
+		return result;
 	}
 
-	private Map<String, List<String>> groupMorseCodeMap(Map<String, String> wordMap) {
+	private List<String> getAllMorseCodeCombination(int length) {
+		List<String> words = new ArrayList<>();
+		getMorseCodeWords(StringUtils.EMPTY, length, words);
+		return words;
+	}
+
+	private void getMorseCodeWords(String base, int length, List<String> list) {
+		CHARACTER_LIST.forEach(element -> {
+			if (length == 1) {
+				list.add(base + element);
+			} else {
+				getMorseCodeWords(base + element, length - 1, list);
+			}
+		});
+	}
+
+	private Map<String, List<String>> groupMorseCodeWords(Map<String, String> wordMap) {
 		Map<String, List<String>> resultMap = new HashMap<>();
 		for (Map.Entry<String, String> entry : wordMap.entrySet()) {
 			if (resultMap.containsKey(entry.getValue())) {
