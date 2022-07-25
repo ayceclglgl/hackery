@@ -13,6 +13,7 @@
         <module>smooshed-morse-code</module>
         <module>texas-hold-em</module>
         <module>world-cup-prognostication</module>
+        <module>hexEd</module>
     </modules>
 
     <properties>
