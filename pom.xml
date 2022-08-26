@@ -14,6 +14,7 @@
         <module>texas-hold-em</module>
         <module>world-cup-prognostication</module>
         <module>hexEd</module>
+        <module>dawkins-weasel</module>
     </modules>
 
     <properties>
