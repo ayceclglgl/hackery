@@ -1,0 +1,1 @@
+https://programmingpraxis.com/2014/11/14/dawkins-weasel/
