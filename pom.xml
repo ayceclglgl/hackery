@@ -15,6 +15,7 @@
         <module>world-cup-prognostication</module>
         <module>hexEd</module>
         <module>dawkins-weasel</module>
+        <module>talking-clock</module>
     </modules>
 
     <properties>
